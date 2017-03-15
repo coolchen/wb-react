@@ -14,6 +14,29 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>React App</title>
+    <style>
+      *,
+      html,
+      body,
+      p {
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        font-size: 62.5%;
+        width: 100%;
+        min-height: 100vh;
+      }
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        width: 100%;
+        min-height: 100vh;
+      }
+      #root {
+        width: 100%;
+        min-height: 100vh;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
@@ -27,5 +50,6 @@
       To begin the development, run `npm start`.
       To create a production bundle, use `npm run build`.
     -->
+    <script type="text/javascript" src="./lib/paper-core.js"></script>
   </body>
 </html>
