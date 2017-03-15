@@ -1,5 +1,6 @@
 var express = require('express'),
     app = express(),
+	socket = require('socket.io'),
 	http = require('http')
 
  
@@ -33,5 +34,12 @@ app.get('/api/status', function(req, res) {
 // Start your express server as usual
 // app.start(3000);
 
-var httpServer = http.createServer(app).listen(3001);
+var server = http.createServer(app).listen(3001);
 
+// LISTEN FOR REQUESTS
+var io = socket.listen(server);
+io.sockets.setMaxListeners(0);
+
+io.sockets.on('connection', function (socket) {
+	console.log("client connected!");
+});
