@@ -7,16 +7,6 @@ class ContentView extends Component {
 	constructor(props) {
 		super(props);
 		this.state = this.calculateNewSize(props.containerWidth, props.containerHeight);
-
-		var room = "1";
-		// Initialise Socket.io
-		// var base_path = /(\/.+)?\/d\/.*/.exec(window.location.pathname)[1] || '/';
-		// var socket = io.connect({ path: base_path + "socket.io"});
-		var socket = io.connect({ path: "/socket.io"});
-		// Join the room
-		socket.emit('subscribe', {
-			room: room
-		});
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -67,26 +57,37 @@ class ContentView extends Component {
 		
 		var s = this.state.newHeight / 720;
 		var newCenter = new paper.Point(this.state.newWidth/2, this.state.newHeight/2);
-		newCenter = new paper.Point(1280/2, 720/2);
-		paper.view.scale(s);
+		newCenter = new paper.Point(0, 0);
+		// paper.view.scale(s);
 
-		// remove width and height propery in style, otherwise the canvas cannot be resized
-		// var oldStyle = this.refs[this.props.viewID].style;
-		// var newStyle;
-		// for (var propertyName in oldStyle) {
-		// 	//document.writeln( propertyName + " : " + myObject[propertyName] );
-		// 	if(propertyName !== "width" || propertyName != "height")
-		// 	{
-		// 		newStyle[propertyName] = oldStyle[propertyName];
-		// 	}
-		// }
-		// this.refs[this.props.viewID].style = newStyle;
+		var transformMatrix = new paper.Matrix(s, 0, 0, s, 0, 0);
+		paper.view.transform(transformMatrix);
+
+		var room = "1";
+		// Initialise Socket.io
+		// var base_path = /(\/.+)?\/d\/.*/.exec(window.location.pathname)[1] || '/';
+		// var socket = io.connect({ path: base_path + "socket.io"});
+		var socket = io.connect({ path: "/socket.io"});
+
+		// Join the room
+		socket.emit('subscribe', {
+			room: room
+		});
+
+		// JSON data ofthe users current drawing
+		// Is sent to the user
+		var path_to_send = {};
 
 		var tool = new paper.Tool();
 		var path;
 
 		// Define a mousedown and mousedrag handler
 		tool.onMouseDown = function(event) {
+			// Ignore middle or right mouse button clicks for now
+			if (event.event.button == 1 || event.event.button == 2) {
+				return;
+			}
+
 			path = new paper.Path();
 			path.strokeColor = 'black';
 			path.add(event.point);
@@ -129,8 +130,11 @@ class ContentView extends Component {
 		// var newCenter = new paper.Point(this.state.newWidth/2, this.state.newHeight/2);
 		// paper.view.size.set(1280, 720);
 		paper.view.viewSize = [this.state.newWidth, this.state.newHeight];
-		var newCenter = new paper.Point(1280/2, 720/2);
-		paper.view.scale(sr);
+		var newCenter = new paper.Point(0, 0);
+		// paper.view.scale(sr);
+
+		var transformMatrix = new paper.Matrix(sr, 0, 0, sr, 0, 0);
+		paper.view.transform(transformMatrix);
 
 		paper.view.draw();
 	}
