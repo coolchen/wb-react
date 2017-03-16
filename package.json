@@ -11,9 +11,12 @@
   "license": "ISC",
   "proxy": "http://localhost:3001",
   "dependencies": {
+    "async": "^2.1.5",
     "express": "^4.15.2",
     "http": "0.0.0",
+    "jsonminify": "^0.4.1",
     "paper": "^0.10.3",
-    "socket.io": "^1.7.3"
+    "socket.io": "^1.7.3",
+    "ueberDB": "^0.2.16"
   }
 }

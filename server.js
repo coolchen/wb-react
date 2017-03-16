@@ -1,4 +1,10 @@
-var express = require('express'),
+var settings = require('./util/Settings.js'),
+    tests = require('./util/tests.js'),
+    draw = require('./util/draw.js'),
+    projects = require('./util/projects.js'),
+    db = require('./util/db.js'),
+	express = require('express'),
+	paper = require('paper'),
     app = express(),
 	socket = require('socket.io'),
 	http = require('http')
@@ -34,7 +40,7 @@ app.get('/api/status', function(req, res) {
 // Start your express server as usual
 // app.start(3000);
 
-var server = http.createServer(app).listen(3001);
+var server = http.createServer(app).listen(settings.port);
 
 // LISTEN FOR REQUESTS
 var io = socket.listen(server);
@@ -42,4 +48,66 @@ io.sockets.setMaxListeners(0);
 
 io.sockets.on('connection', function (socket) {
 	console.log("client connected!");
+
+	socket.on('subscribe', function(data) {
+		subscribe(socket, data);
+	});
+
 });
+
+// Subscribe a client to a room
+function subscribe(socket, data) {
+  var room = data.room;
+
+  // Subscribe the client to the room
+  socket.join(room);
+
+  // If the close timer is set, cancel it
+  // if (closeTimer[room]) {
+  //  clearTimeout(closeTimer[room]);
+  // }
+
+  // Create Paperjs instance for this room if it doesn't exist
+  var project = projects.projects[room];
+  if (!project) {
+    console.log("made room");
+    projects.projects[room] = {};
+    // Use the view from the default project. This project is the default
+    // one created when paper is instantiated. Nothing is ever written to
+    // this project as each room has its own project. We share the View
+    // object but that just helps it "draw" stuff to the invisible server
+    // canvas.
+    projects.projects[room].project = new paper.Project();
+    projects.projects[room].external_paths = {};
+    db.load(room, socket);
+  } else { // Project exists in memory, no need to load from database
+    loadFromMemory(room, socket);
+  }
+
+  // Broadcast to room the new user count -- currently broken
+  var rooms = socket.adapter.rooms[room]; 
+  var roomUserCount = Object.keys(rooms).length;
+  io.to(room).emit('user:connect', roomUserCount);
+}
+
+var clientSettings = {
+  "tool": settings.tool
+}
+
+// Send current project to new client
+function loadFromMemory(room, socket) {
+  var project = projects.projects[room].project;
+  if (!project) { // Additional backup check, just in case
+    db.load(room, socket);
+    return;
+  }
+  socket.emit('loading:start');
+  var value = project.exportJSON();
+  socket.emit('project:load', {project: value});
+  socket.emit('settings', clientSettings);
+  socket.emit('loading:end');
+}
+
+function loadError(socket) {
+  socket.emit('project:load:error');
+}
