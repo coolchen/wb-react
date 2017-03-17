@@ -5,7 +5,7 @@ var db = require('./db.js');
 projects = projects.projects;
 
 // Create an in memory paper canvas
-var drawing = paper.setup(new paper.Canvas(1920, 1080));
+var drawing = paper.setup(new paper.Canvas(1280, 720));
 
 // Continues to draw a path in real time
 exports.progressExternalPath = function (room, points, artist) {

@@ -62,8 +62,8 @@ io.sockets.on('connection', function (socket) {
 	// Having room as a parameter is not good for secure rooms
 	socket.on('draw:progress', function (room, uid, co_ordinates) {
 		if (!projects.projects[room] || !projects.projects[room].project) {
-		loadError(socket);
-		return;
+			loadError(socket);
+			return;
 		}
 		io.in(room).emit('draw:progress', uid, co_ordinates);
 		draw.progressExternalPath(room, JSON.parse(co_ordinates), uid);
@@ -73,8 +73,8 @@ io.sockets.on('connection', function (socket) {
 	// Having room as a parameter is not good for secure rooms
 	socket.on('draw:end', function (room, uid, co_ordinates) {
 		if (!projects.projects[room] || !projects.projects[room].project) {
-		loadError(socket);
-		return;
+			loadError(socket);
+			return;
 		}
 		io.in(room).emit('draw:end', uid, co_ordinates);
 		draw.endExternalPath(room, JSON.parse(co_ordinates), uid);
