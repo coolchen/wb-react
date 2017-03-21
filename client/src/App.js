@@ -5,7 +5,7 @@ import './App.css';
 import AppBar from 'react-toolbox/lib/app_bar/AppBar';
 import Navigation from 'react-toolbox/lib/navigation/Navigation';
 import Link from 'react-toolbox/lib/link/Link';
-
+import Dialog from 'react-toolbox/lib/dialog/Dialog';
 import Button from 'react-toolbox/lib/button/Button';
 
 import ContentView from './ContentView.js';
@@ -17,19 +17,43 @@ const GithubIcon = () => (
 );
 
 class App extends Component {
+
+  state = {
+    active: false
+  };
+
+  handleToggle = () => {
+    this.setState({active: !this.state.active});
+  }
+
+  actions = [
+    { label: "Cancel", onClick: this.handleToggle },
+    { label: "Save", onClick: this.handleToggle }
+  ];
+
+  componentDidMount() {
+    console.log("App component did mount!");
+  }
+
   render() {
     return (
       <div className="App"> 
-  <AppBar title='React Toolbox' leftIcon='menu' rightIcon={<GithubIcon />}>
-    <Navigation type='horizontal'>
-      <Link href='http://' label='Inbox' icon='inbox' />
-      <Link href='http://' active label='Profile' icon='person' />
-      <Button icon='add' floating />
-    </Navigation>
-  </AppBar>
+        <div className="Side-Bar">
+          <Button icon='border_color' floating inverse />
+          <Button icon='picture_as_pdf' floating inverse onClick={this.handleToggle}/>
+        </div>
         <div className="Content-Wrapper">
           <ContentView viewID="view1" />
         </div>
+        <Dialog
+          actions={this.actions}
+          active={this.state.active}
+          onEscKeyDown={this.handleToggle}
+          onOverlayClick={this.handleToggle}
+          title='上传图片'
+        >
+          <p>Here you can add arbitrary content. Components like Pickers are using dialogs now.</p>
+        </Dialog>
       </div>
     );
   }

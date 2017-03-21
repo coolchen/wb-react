@@ -26,7 +26,16 @@
 }
 
 .Content-Wrapper {
-  width: 100%;
+  width: 95%;
   height: 100%;
+  float: left;
+  vertical-align: center;
   background: gray;
+}
+
+.Side-Bar {
+  width: 5%;
+  height: 100%;
+  float: left;
+  background: dimgrey
 }

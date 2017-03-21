@@ -118,6 +118,8 @@ class ContentView extends Component {
 
 
 	componentDidMount() {
+		console.log("content view did mount!");
+		
         // Instantiate the paperScope with the canvas element
         var myCanvas = document.getElementById(this.props.viewID);
 		// var paper = window.paper;
@@ -279,7 +281,6 @@ class ContentView extends Component {
 			<div width={this.state.newWidth} height={this.state.newHeight}>
 				<canvas id={this.props.viewID} className="ContentCanvas" ref={this.props.viewID}
 					/>
-				<button onClick={this.buttonClicked.bind(this)}>Add new circle</button>
 			</div>
 		)
 	}
