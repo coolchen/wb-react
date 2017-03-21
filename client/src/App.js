@@ -2,7 +2,11 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-// import AppBar from 'react-toolbox/lib/app_bar';
+import AppBar from 'react-toolbox/lib/app_bar/AppBar';
+import Navigation from 'react-toolbox/lib/navigation/Navigation';
+import Link from 'react-toolbox/lib/link/Link';
+
+import Button from 'react-toolbox/lib/button/Button';
 
 import ContentView from './ContentView.js';
 
@@ -16,6 +20,13 @@ class App extends Component {
   render() {
     return (
       <div className="App"> 
+  <AppBar title='React Toolbox' leftIcon='menu' rightIcon={<GithubIcon />}>
+    <Navigation type='horizontal'>
+      <Link href='http://' label='Inbox' icon='inbox' />
+      <Link href='http://' active label='Profile' icon='person' />
+      <Button icon='add' floating />
+    </Navigation>
+  </AppBar>
         <div className="Content-Wrapper">
           <ContentView viewID="view1" />
         </div>

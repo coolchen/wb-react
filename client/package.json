@@ -11,12 +11,14 @@
     "socket.io-client": "^1.7.3"
   },
   "devDependencies": {
-    "react-scripts": "0.9.5"
+    "react-scripts": "0.9.5",
+    "react-toolbox-themr": "^1.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
+    "toolbox": "react-toolbox-themr",
     "eject": "react-scripts eject"
   }
 }
