@@ -81,10 +81,10 @@ class App extends Component {
 			}
 		});
 
-    socket.on('image:add', function(artist, data, position, name) {
+    socket.on('image:add', function(artist, data, position, name, scale) {
       var paper = papers[0];
       if (artist != uid) {
-        paper.onImageAdded(data, position, name);
+        paper.onImageAdded(data, position, name, scale);
       }
     });
 

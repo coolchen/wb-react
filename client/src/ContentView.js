@@ -136,18 +136,28 @@ class ContentView extends Component {
 
 				//Add to paper project here
 				var raster = new paper.Raster(bin);
-				raster.position = paper.view.center;
-				raster.name = uid + ":" + (++parthParas.paper_object_count);
-				socket.emit('image:add', room, uid, JSON.stringify(bin), raster.position, raster.name);
+
+				raster.onLoad = function() {
+					raster.position = paper.view.center;
+
+					var scaleX = 1280 / raster.width;
+					var scaleY = 720 / raster.height;
+					var s = scaleX < scaleY ? scaleX : scaleY;
+					raster.scale(s);
+
+					raster.name = uid + ":" + (++parthParas.paper_object_count);
+					socket.emit('image:add', room, uid, JSON.stringify(bin), raster.position, raster.name, s);
+				}
 			});
 		};
 		
-		function onImageAdded(data, position, name) {
+		function onImageAdded(data, position, name, scale) {
 			paper.activate();
 
 			var image = JSON.parse(data);
 			var raster = new paper.Raster(image);
 			raster.position = new paper.Point(position[1], position[2]);
+			raster.scale(scale);
 			raster.name = name;
 			paper.view.draw();
 		}
@@ -321,22 +331,22 @@ class ContentView extends Component {
 
     }
 
-	buttonClicked() {
-		var paper = this.paper;
-		paper.activate();
+	// buttonClicked() {
+	// 	var paper = this.paper;
+	// 	paper.activate();
 
-		var width = paper.view.size.width;
-        var height = paper.view.size.height;
-        var circle = new paper.Shape.Circle({
-            center: [width / 4, height / 4],
-            fillColor: 'grey',
-            radius: 10
-        });
+	// 	var width = paper.view.size.width;
+    //     var height = paper.view.size.height;
+    //     var circle = new paper.Shape.Circle({
+    //         center: [width / 4, height / 4],
+    //         fillColor: 'grey',
+    //         radius: 10
+    //     });
         
-        // render
-        paper.view.draw();
+    //     // render
+    //     paper.view.draw();
 
-	}
+	// }
 
 	componentDidUpdate(prevProps, prevState) {
 		var paper = this.paper;
