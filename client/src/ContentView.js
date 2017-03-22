@@ -53,73 +53,94 @@ class ContentView extends Component {
 		return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
 	}());
 
-	external_paths = {};
-
-	progress_external_path = (points, artist) => {
+	registerPapers() {
+		var external_paths = {};
 		var paper = this.paper;
-		paper.activate();
-		var external_paths = this.external_paths;
-		var path = external_paths[artist];
 
-		// The path hasnt already been started
-		// So start it
-		if (!path) {
+		var loadProject = function(json) {
+			console.log("project:load");
+			paper.activate();
+			paper.project.activeLayer.remove();
+			paper.project.importJSON(json.project);
 
-			// Creates the path in an easy to access way
-			external_paths[artist] = new paper.Path();
-			path = external_paths[artist];
+			paper.view.draw();
+		};
 
-			// Starts the path
-			var start_point = new paper.Point(points.start[1], points.start[2]);
-			var color = new paper.Color(0, 0, 0, 1);
+		var progress_external_path = function(points, artist) {
+			paper.activate();
+			// var external_paths = this.external_paths;
+			var path = external_paths[artist];
 
-			path.strokeColor = color;
-			path.strokeWidth = 2;
+			// The path hasnt already been started
+			// So start it
+			if (!path) {
 
-			path.name = points.name;
-			path.add(start_point);
+				// Creates the path in an easy to access way
+				external_paths[artist] = new paper.Path();
+				path = external_paths[artist];
 
-		}
+				// Starts the path
+				var start_point = new paper.Point(points.start[1], points.start[2]);
+				var color = new paper.Color(0, 0, 0, 1);
 
-		// Draw all the points along the length of the path
-		var paths = points.path;
-		var length = paths.length;
-		for (var i = 0; i < length; i++) {
+				path.strokeColor = color;
+				path.strokeWidth = 2;
 
-			path.add(new paper.Point(paths[i].top[1], paths[i].top[2]));
-			path.insert(0, new paper.Point(paths[i].bottom[1], paths[i].bottom[2]));
+				path.name = points.name;
+				path.add(start_point);
 
-		}
+			}
 
-		path.smooth();
-		paper.view.draw();
-	};
+			// Draw all the points along the length of the path
+			var paths = points.path;
+			var length = paths.length;
+			for (var i = 0; i < length; i++) {
 
-	end_external_path = (points, artist) => {
-		var paper = this.paper;
-		paper.activate();
-		var external_paths = this.external_paths;
+				path.add(new paper.Point(paths[i].top[1], paths[i].top[2]));
+				path.insert(0, new paper.Point(paths[i].bottom[1], paths[i].bottom[2]));
 
-		var path = external_paths[artist];
+			}
 
-		if (path) {
-
-			// Close the path
-			path.add(new paper.Point(points.end[1], points.end[2]));
-			path.closed = true;
 			path.smooth();
 			paper.view.draw();
+		};
 
-			// Remove the old data
-			external_paths[artist] = false;
+		var end_external_path = function(points, artist){
+			// var paper = this.paper;
+			paper.activate();
+			// var external_paths = this.external_paths;
 
+			var path = external_paths[artist];
+
+			if (path) {
+
+				// Close the path
+				path.add(new paper.Point(points.end[1], points.end[2]));
+				path.closed = true;
+				path.smooth();
+				paper.view.draw();
+
+				// Remove the old data
+				external_paths[artist] = false;
+
+			}
+		};
+
+		var cb = {
+			loadProject: loadProject,
+			end_external_path: end_external_path,
+			progress_external_path: progress_external_path
 		}
-	};
+
+		this.props.reg("1", cb);
+	}
+
+
 
 
 	componentDidMount() {
 		console.log("content view did mount!");
-		
+
         // Instantiate the paperScope with the canvas element
         var myCanvas = document.getElementById(this.props.viewID);
 		// var paper = window.paper;
@@ -134,38 +155,42 @@ class ContentView extends Component {
 		var transformMatrix = new paper.Matrix(s, 0, 0, s, 0, 0);
 		paper.view.transform(transformMatrix);
 
-		var room = "1";
-		// Initialise Socket.io
-		// var base_path = /(\/.+)?\/d\/.*/.exec(window.location.pathname)[1] || '/';
-		// var socket = io.connect({ path: base_path + "socket.io"});
-		var socket = io.connect({ path: "/socket.io"});
+		this.registerPapers();
 
-		// Join the room
-		socket.emit('subscribe', {
-			room: room
-		});
+		// var room = "1";
+		// // Initialise Socket.io
+		// // var base_path = /(\/.+)?\/d\/.*/.exec(window.location.pathname)[1] || '/';
+		// // var socket = io.connect({ path: base_path + "socket.io"});
+		// var socket = io.connect({ path: "/socket.io"});
 
-		socket.on('project:load', function(json) {
-			console.log("project:load");
-			paper.project.activeLayer.remove();
-			paper.project.importJSON(json.project);
+		// // Join the room
+		// socket.emit('subscribe', {
+		// 	room: room
+		// });
 
-			paper.view.draw();
-		});
+		// socket.on('project:load', function(json) {
+		// 	console.log("project:load");
+		// 	paper.project.activeLayer.remove();
+		// 	paper.project.importJSON(json.project);
 
-		socket.on('draw:progress', (artist, data) => {
-			// It wasnt this user who created the event
-			if (artist !== this.uid && data) {
-				this.progress_external_path(JSON.parse(data), artist);
-			}
-		});
+		// 	paper.view.draw();
+		// });
 
-		socket.on('draw:end', (artist, data) => {
-			// It wasnt this user who created the event
-			if (artist !== this.uid && data) {
-				this.end_external_path(JSON.parse(data), artist);
-			}
-		});
+		// socket.on('draw:progress', (artist, data) => {
+		// 	// It wasnt this user who created the event
+		// 	if (artist !== this.uid && data) {
+		// 		this.progress_external_path(JSON.parse(data), artist);
+		// 	}
+		// });
+
+		// socket.on('draw:end', (artist, data) => {
+		// 	// It wasnt this user who created the event
+		// 	if (artist !== this.uid && data) {
+		// 		this.end_external_path(JSON.parse(data), artist);
+		// 	}
+		// });
+		var socket = this.props.socket;
+		var room = this.props.room;
 
 		// JSON data ofthe users current drawing
 		// Is sent to the user
