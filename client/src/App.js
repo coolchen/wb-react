@@ -19,6 +19,15 @@ class App extends Component {
     active: false
   }
 
+	// Random User ID
+	// Used when sending data
+	uid = (function() {
+		var S4 = function() {
+			return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+		};
+		return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+	}());
+
   papers = []
   room = "1";
   // Initialise Socket.io
@@ -31,7 +40,7 @@ class App extends Component {
     // this.setupWebSocketConnection();
   }
 
-  unregisterPaperInstance(uid) {
+  unregisterPaperInstance(pid) {
 
   }
 
@@ -39,6 +48,7 @@ class App extends Component {
     var papers = this.papers;
     var room = this.room;
     var socket = this.socket;
+    var uid = this.uid;
 
 		// Join the room
 		socket.emit('subscribe', {
@@ -70,10 +80,26 @@ class App extends Component {
 				paper.end_external_path(JSON.parse(data), artist);
 			}
 		});
+
+    socket.on('image:add', function(artist, data, position, name) {
+      var paper = papers[0];
+      if (artist != uid) {
+        paper.onImageAdded(data, position, name);
+      }
+    });
+
+    socket.on('canvas:clear', function() {
+      var paper = papers[0];
+      paper.clearCanvas();
+    });
   }
 
   handleToggle = () => {
     this.setState({active: !this.state.active});
+  }
+
+  clearProject = () => {
+    this.socket.emit('canvas:clear', this.room);
   }
 
   actions = [
@@ -81,8 +107,11 @@ class App extends Component {
     { label: "Save", onClick: this.handleToggle }
   ];
 
-  onDrop(files) {
+  onDrop = (files) => {
     console.log('Received files: ', files);
+    var paper = this.papers[0];
+    paper.uploadImage(files[0]);
+    this.handleToggle();
   }
 
   componentDidMount() {
@@ -95,11 +124,12 @@ class App extends Component {
       <div className="App"> 
         <div className="Side-Bar">
           <Button icon='border_color' floating inverse />
-          <Button icon='picture_as_pdf' floating inverse onClick={this.handleToggle}/>
+          <Button icon='picture_as_pdf' floating inverse onClick={this.handleToggle} />
+          <Button icon='delete_forever' floating inverse onClick={this.clearProject} />
         </div>
         <div className="Content-Wrapper">
           <ContentView viewID="view1" reg={this.registerPaperInstance.bind(this)} socket={this.socket} 
-            room={this.room}/>
+            room={this.room} uid={this.uid}/>
         </div>
         <Dialog
           actions={this.actions}

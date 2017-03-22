@@ -44,18 +44,17 @@ class ContentView extends Component {
 		color: 'blue',
 	};
 
-	// Random User ID
-	// Used when sending data
-	uid = (function() {
-		var S4 = function() {
-			return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-		};
-		return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-	}());
+	pathParas = {
+		paper_object_count: 0
+	}
 
 	registerPapers() {
 		var external_paths = {};
 		var paper = this.paper;
+		var parthParas = this.pathParas;
+		var uid = this.props.uid;
+		var socket = this.props.socket;
+		var room = this.props.room;
 
 		var loadProject = function(json) {
 			console.log("project:load");
@@ -126,10 +125,62 @@ class ContentView extends Component {
 			}
 		};
 
+		function uploadImage(file) {
+			var reader = new FileReader();
+
+			//attach event handler
+			reader.readAsDataURL(file);
+			reader.addEventListener('loadend', function(e) {
+				paper.activate();
+				var bin = this.result;
+
+				//Add to paper project here
+				var raster = new paper.Raster(bin);
+				raster.position = paper.view.center;
+				raster.name = uid + ":" + (++parthParas.paper_object_count);
+				socket.emit('image:add', room, uid, JSON.stringify(bin), raster.position, raster.name);
+			});
+		};
+		
+		function onImageAdded(data, position, name) {
+			paper.activate();
+
+			var image = JSON.parse(data);
+			var raster = new paper.Raster(image);
+			raster.position = new paper.Point(position[1], position[2]);
+			raster.name = name;
+			paper.view.draw();
+		}
+
+		function clearCanvas() {
+			paper.activate();
+			var project = paper.project;
+
+			// Remove all but the active layer
+			if (project.layers.length > 1) {
+				var activeLayerID = project.activeLayer._id;
+				for (var i = 0; i < project.layers.length; i++) {
+					if (project.layers[i]._id != activeLayerID) {
+						project.layers[i].remove();
+						i--;
+					}
+				}
+			}
+
+			// Remove all of the children from the active layer
+			if (paper.project.activeLayer && paper.project.activeLayer.hasChildren()) {
+				paper.project.activeLayer.removeChildren();
+			}
+			paper.view.draw();
+		}
+
 		var cb = {
 			loadProject: loadProject,
 			end_external_path: end_external_path,
-			progress_external_path: progress_external_path
+			progress_external_path: progress_external_path,
+			uploadImage: uploadImage,
+			onImageAdded: onImageAdded,
+			clearCanvas: clearCanvas
 		}
 
 		this.props.reg("1", cb);
@@ -195,7 +246,9 @@ class ContentView extends Component {
 		// JSON data ofthe users current drawing
 		// Is sent to the user
 		var path_to_send = {};
-		var paper_object_count = 0;
+		// var paper_object_count = 0;
+		var pathParas = this.pathParas;
+		var uid = this.props.uid;
 
 		var tool = new paper.Tool();
 		var path;
@@ -219,7 +272,7 @@ class ContentView extends Component {
 			path = new paper.Path();
 			path.strokeColor = active_color_rgb;
 			path.strokeWidth = 2;
-			path.name = this.uid + ":" + (++paper_object_count);
+			path.name = this.uid + ":" + (++pathParas.paper_object_count);
 			path.add(event.point);
 
 			// The data we will send every 100ms on mouse drag

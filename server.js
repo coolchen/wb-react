@@ -80,6 +80,22 @@ io.sockets.on('connection', function (socket) {
 		draw.endExternalPath(room, JSON.parse(co_ordinates), uid);
 	});
 
+	// User clears canvas
+	socket.on('canvas:clear', function(room) {
+		if (!projects.projects[room] || !projects.projects[room].project) {
+			loadError(socket);
+			return;
+		}
+		draw.clearCanvas(room);
+		io.in(room).emit('canvas:clear');
+	});
+
+	// User adds a raster image
+	socket.on('image:add', function(room, uid, data, position, name) {
+		draw.addImage(room, uid, data, position, name);
+		io.sockets.in(room).emit('image:add', uid, data, position, name);
+	});
+
 });
 
 // Subscribe a client to a room
