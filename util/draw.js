@@ -126,12 +126,13 @@ exports.moveItemsEnd = function(room, artist, itemNames, delta) {
 }
 
 // Add image to canvas
-exports.addImage = function(room, artist, data, position, name) {
+exports.addImage = function(room, artist, data, position, name, scale) {
   var project = projects[room].project;
   if (project && project.activeLayer) {
     var image = JSON.parse(data);
     var raster = new drawing.Raster(image);
     raster.position = new drawing.Point(position[1], position[2]);
+    raster.scale(scale);
     raster.name = name;
     db.storeProject(room);
   }
