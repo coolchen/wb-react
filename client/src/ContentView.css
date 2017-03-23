@@ -1,5 +1,5 @@
 .ContentCanvas {
-  position:relative;
+  position:absolute;
   cursor:hand;
   background: white;
 }

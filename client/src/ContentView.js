@@ -24,19 +24,31 @@ class ContentView extends Component {
 	}
 
 	calculateNewSize(containerWidth, containerHeight) {
-		var w, h;
+		var w, h, x, y;
 		if(containerWidth*9 > containerHeight*16) {
 			w = containerHeight*16/9;
 			h = containerHeight;
+			x = (containerWidth - w)/2;
+			y = 0;
 		}
 		else {
 			w = containerWidth;
 			h = containerWidth*9/16;
+			x = 0;
+			y = (containerHeight - h)/2;
 		}
+
+		var styles = {
+			top: y + "px",
+			left: x + "px"
+		};
 
 		return {
 			newWidth: w,
-			newHeight: h
+			newHeight: h,
+			startX: x,
+			starty: y,
+			styles: styles
 		}
 	}
 
@@ -366,8 +378,9 @@ class ContentView extends Component {
 
 	render() {
 		return (
-			<div width={this.state.newWidth} height={this.state.newHeight}>
-				<canvas id={this.props.viewID} className="ContentCanvas" ref={this.props.viewID}
+			<div style={this.state.styles} 
+			width={this.state.newWidth + "px"} height={this.state.newHeight + "px"} className="ContentCanvas"  >
+				<canvas id={this.props.viewID} ref={this.props.viewID}
 					/>
 			</div>
 		)

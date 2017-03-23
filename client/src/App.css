@@ -31,6 +31,7 @@
   float: left;
   vertical-align: center;
   background: gray;
+  position: relative;
 }
 
 .Side-Bar {

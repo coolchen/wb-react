@@ -19,6 +19,7 @@ var settings = require('./util/Settings.js'),
 if (process.env.NODE_ENV !== 'production') {
     console.log('DEVOLOPMENT ENVIRONMENT: Turning on WebPack Middleware...');
     // webpackDevHelper.useWebpackMiddleware(app);
+	app.use('/uploaded', express.static(__dirname + '/client/uploaded'));
 } else {
     console.log('PRODUCTION ENVIRONMENT');
  
