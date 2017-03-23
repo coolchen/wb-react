@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Dimensions from 'react-dimensions';
 import io from 'socket.io-client';
+import ReactPDF from 'react-pdf';
 import './ContentView.css';
 
 class ContentView extends Component {
@@ -20,6 +21,26 @@ class ContentView extends Component {
 			nextProps.containerHeight !== this.props.containerHeight) 
 		{
 			this.setState(this.calculateNewSize(nextProps.containerWidth, nextProps.containerHeight));
+			this.setState(this.calculateNewPdfSize(nextProps.containerWidth, nextProps.containerHeight, 
+							this.pdfWidth, this.pdfHeight));
+		}
+	}
+
+	calculateNewPdfSize(containerWidth, containerHeight, pdfWidth, pdfHeight)
+	{
+		if(pdfWidth ===0 || pdfHeight === 0) {
+			return {}
+		}
+
+		var pw;
+		if(pdfWidth*9 > pdfHeight*16) {
+			pw = containerWidth;
+		} else {
+			pw = containerHeight * (pdfWidth / pdfHeight);
+		}
+
+		return {
+			pdfNewWidth: pw
 		}
 	}
 
@@ -376,12 +397,41 @@ class ContentView extends Component {
 		paper.view.draw();
 	}
 
+	onDocumentLoad = ({ total }) => {
+		this.setState({ total });
+	}
+
+	// onPageLoad = ({ pageIndex, pageNumber }) => {
+	// 	this.setState({ pageIndex, pageNumber });
+	// }
+	
+	pdfWidth = 0;
+	pdfHeight = 0;
+
+	onPageLoad = ({ pageIndex, pageNumber, width, height, originalWidth, originalHeight, scale }) => {
+		//alert('Now displaying a page number ' + pageNumber + '!')
+		//scale = this.state.newWidth / originalWidth;
+		this.pdfWidth = originalWidth;
+		this.pdfHeight = originalHeight;
+
+		this.setState(this.calculateNewPdfSize(this.state.newWidth, this.state.newHeight, 
+				this.pdfWidth, this.pdfHeight));
+	}
+
 	render() {
 		return (
 			<div style={this.state.styles} 
 			width={this.state.newWidth + "px"} height={this.state.newHeight + "px"} className="ContentCanvas"  >
-				<canvas id={this.props.viewID} ref={this.props.viewID}
+				<canvas id={this.props.viewID} ref={this.props.viewID} className="PaperCanvas"/>
+				<div className="PdfCanvas">
+					<ReactPDF
+						file="uploaded/GPU_HowThingsWork.pdf"
+						onDocumentLoad={this.onDocumentLoad}
+						onPageLoad={this.onPageLoad}
+						width={this.state.pdfNewWidth}
+						scale={this.state.pdfScale}
 					/>
+				</div>
 			</div>
 		)
 	}
