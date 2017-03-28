@@ -1,8 +1,15 @@
-.ContentCanvas {
+.PdfLayer {
   position:absolute;
   cursor:hand;
-  background: white;
-  z-index: 0;
+  background: transparent;
+  z-index: 1;
+}
+
+.PaperLayer {
+  position:absolute;
+  cursor:hand;
+  background: transparent;
+  z-index: 2;
 }
 
 .PaperCanvas {

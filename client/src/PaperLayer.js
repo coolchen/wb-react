@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
-import Dimensions from 'react-dimensions';
+// import Dimensions from 'react-dimensions';
 import io from 'socket.io-client';
-import ReactPDF from 'react-pdf';
+// import ReactPDF from 'react-pdf';
 import './ContentView.css';
 
 class PaperLayer extends Component {
 	constructor(props) {
 		super(props);
-		this.state = this.calculateNewSize(props.containerWidth, props.containerHeight);
+		this.state = {
+			styles: this.getNewStyle(this.props.canvasSize)
+		};
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -17,65 +19,60 @@ class PaperLayer extends Component {
 		// }
 		console.log("container size changed!");
 		console.log(nextProps);
-		if(nextProps.containerWidth !== this.props.containerWidth ||
-			nextProps.containerHeight !== this.props.containerHeight) 
+		// if(nextProps.canvasSize.startY !== this.props.canvasSize.startY ||
+		// 	nextProps.canvasSize.startX !== this.props.canvasSize.startX ||
+		// 	nextProps.canvasSize.newWidth !== this.props.canvasSize.newWidth ||
+		// 	nextProps.canvasSize.newHeight !== this.props.canvasSize.newHeight) 
 		{
-			this.setState(this.calculateNewSize(nextProps.containerWidth, nextProps.containerHeight));
-			this.setState(this.calculateNewPdfSize(nextProps.containerWidth, nextProps.containerHeight, 
-							this.pdfWidth, this.pdfHeight));
+			this.setState({
+				styles: this.getNewStyle(nextProps.canvasSize)
+			});
+			// this.setState(this.calculateNewPdfSize(nextProps.containerWidth, nextProps.containerHeight, 
+			// 				this.pdfWidth, this.pdfHeight));
 		}
 	}
 
-	calculateNewPdfSize(containerWidth, containerHeight, pdfWidth, pdfHeight)
-	{
-		if(pdfWidth ===0 || pdfHeight === 0) {
-			return {}
-		}
-
-		var pw;
-		if(pdfWidth*9 > pdfHeight*16) {
-			pw = containerWidth;
-		} else {
-			pw = containerHeight * (pdfWidth / pdfHeight);
-		}
-
+	getNewStyle(canvasSize) {
 		return {
-			pdfNewWidth: pw
-		}
-	}
-
-	calculateNewSize(containerWidth, containerHeight) {
-		var w, h, x, y;
-		if(containerWidth*9 > containerHeight*16) {
-			w = containerHeight*16/9;
-			h = containerHeight;
-			x = (containerWidth - w)/2;
-			y = 0;
-		}
-		else {
-			w = containerWidth;
-			h = containerWidth*9/16;
-			x = 0;
-			y = (containerHeight - h)/2;
-		}
-
-		var styles = {
-			top: y + "px",
-			left: x + "px"
+			top: canvasSize.startY + "px",
+			left: canvasSize.startX + "px",
+			width: canvasSize.newWidth + "px",
+			height: canvasSize.newHeight + "px",
+			position: "absolute",
+			zIndex: "2"
 		};
-
-		return {
-			newWidth: w,
-			newHeight: h,
-			startX: x,
-			starty: y,
-			styles: styles
-		}
 	}
 
-	canvasStyle = {
-		color: 'blue',
-	};
+	// calculateNewSize(containerWidth, containerHeight) {
+	// 	var w, h, x, y;
+	// 	if(containerWidth*9 > containerHeight*16) {
+	// 		w = containerHeight*16/9;
+	// 		h = containerHeight;
+	// 		x = (containerWidth - w)/2;
+	// 		y = 0;
+	// 	}
+	// 	else {
+	// 		w = containerWidth;
+	// 		h = containerWidth*9/16;
+	// 		x = 0;
+	// 		y = (containerHeight - h)/2;
+	// 	}
+
+	// 	var styles = {
+	// 		top: y + "px",
+	// 		left: x + "px",
+	// 		position: "absolute",
+	// 		zIndex: "2"
+	// 	};
+
+	// 	return {
+	// 		newWidth: w,
+	// 		newHeight: h,
+	// 		startX: x,
+	// 		startY: y,
+	// 		styles: styles
+	// 	}
+	// }
 
 	pathParas = {
 		paper_object_count: 0
@@ -242,9 +239,9 @@ class PaperLayer extends Component {
 		this.paper = paper;
         paper.setup(myCanvas);
 		console.log("view center is " + paper.view.center);
-		paper.view.viewSize = [this.state.newWidth, this.state.newHeight];
+		paper.view.viewSize = [this.props.canvasSize.newWidth, this.props.canvasSize.newHeight];
 		
-		var s = this.state.newHeight / 720;
+		var s = this.props.canvasSize.newHeight / 720;
 
 		var transformMatrix = new paper.Matrix(s, 0, 0, s, 0, 0);
 		paper.view.transform(transformMatrix);
@@ -385,11 +382,11 @@ class PaperLayer extends Component {
 		var paper = this.paper;
 		paper.activate();
 
-		var s = this.state.newHeight / 720;
+		var s = this.props.canvasSize.newHeight / 720;
 		var sr = s / paper.view.scaling.x;
 		console.log("original scaling is:" + paper.view.scaling);
 		console.log("scale to " + sr);
-		paper.view.viewSize = [this.state.newWidth, this.state.newHeight];
+		paper.view.viewSize = [this.props.canvasSize.newWidth, this.props.canvasSize.newHeight];
 
 		var transformMatrix = new paper.Matrix(sr, 0, 0, sr, 0, 0);
 		paper.view.transform(transformMatrix);
@@ -397,45 +394,13 @@ class PaperLayer extends Component {
 		paper.view.draw();
 	}
 
-	onDocumentLoad = ({ total }) => {
-		this.setState({ total });
-	}
-
-	// onPageLoad = ({ pageIndex, pageNumber }) => {
-	// 	this.setState({ pageIndex, pageNumber });
-	// }
-	
-	pdfWidth = 0;
-	pdfHeight = 0;
-
-	onPageLoad = ({ pageIndex, pageNumber, width, height, originalWidth, originalHeight, scale }) => {
-		//alert('Now displaying a page number ' + pageNumber + '!')
-		//scale = this.state.newWidth / originalWidth;
-		this.pdfWidth = originalWidth;
-		this.pdfHeight = originalHeight;
-
-		this.setState(this.calculateNewPdfSize(this.state.newWidth, this.state.newHeight, 
-				this.pdfWidth, this.pdfHeight));
-	}
-
 	render() {
 		return (
-			<div style={this.state.styles} 
-			width={this.state.newWidth + "px"} height={this.state.newHeight + "px"} className="ContentCanvas"  >
+			<div style={this.state.styles} className="PaperLayer">
 				<canvas id={this.props.viewID} ref={this.props.viewID} className="PaperCanvas"/>
-				<div className="PdfCanvas">
-					<ReactPDF
-						file="uploaded/GPU_HowThingsWork.pdf"
-						onDocumentLoad={this.onDocumentLoad}
-						onPageLoad={this.onPageLoad}
-						width={this.state.pdfNewWidth}
-						scale={this.state.pdfScale}
-						pageIndex={this.props.page}
-					/>
-				</div>
 			</div>
 		)
 	}
 }
 
-export default Dimensions()(PaperLayer);
+export default PaperLayer;
