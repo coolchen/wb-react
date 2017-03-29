@@ -97,6 +97,11 @@ io.sockets.on('connection', function (socket) {
 		io.sockets.in(room).emit('image:add', uid, data, position, name, scale);
 	});
 
+	socket.on('draw:changePage', function(room, uid, prev, next) {
+		draw.changePage(room, uid, prev, next);
+		io.sockets.in(room).emit('draw:changePage', uid, prev, next);
+	});
+
 });
 
 // Subscribe a client to a room

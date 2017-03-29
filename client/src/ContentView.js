@@ -66,17 +66,23 @@ class ContentView extends Component {
 	}
 
 	nextPage = () => {
+		var oldPage = this.state.pageIndex;
 		var newPage = this.state.pageIndex + 1;
 		this.setState({
 			pageIndex: newPage
 		});
+
+		this.props.socket.emit('draw:changePage', this.props.room, this.uid, oldPage, newPage);
 	}
 
 	prevPage = () => {
+		var oldPage = this.state.pageIndex;
 		var newPage = this.state.pageIndex - 1;
 		this.setState({
 			pageIndex: newPage
 		});
+
+		this.props.socket.emit('draw:changePage', this.props.room, this.uid, oldPage, newPage);
 	}
 
 	render() {
@@ -87,7 +93,8 @@ class ContentView extends Component {
 						room={this.props.room} uid={this.props.uid} page={this.state.pageIndex} 
 						canvasSize={this.state.canvasSize} zIndex={1} />
 					<PaperLayer viewID={this.props.viewID} reg={this.props.reg} socket={this.props.socket} 
-						room={this.props.room} uid={this.props.uid} canvasSize={this.state.canvasSize} zIndex={2} />
+						room={this.props.room} uid={this.props.uid} canvasSize={this.state.canvasSize}
+						page={this.state.pageIndex} zIndex={2} />
 				</div>
 				<div className="ContentToolBar">
 					<Button icon='keyboard_arrow_left' inverse mini onClick={this.prevPage}/>

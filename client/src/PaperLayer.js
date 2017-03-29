@@ -30,6 +30,10 @@ class PaperLayer extends Component {
 			// this.setState(this.calculateNewPdfSize(nextProps.containerWidth, nextProps.containerHeight, 
 			// 				this.pdfWidth, this.pdfHeight));
 		}
+
+		if(nextProps.page !== this.props.page) {
+			this.changePage(this.props.page, nextProps.page);
+		}
 	}
 
 	getNewStyle(canvasSize) {
@@ -41,6 +45,22 @@ class PaperLayer extends Component {
 			position: "absolute",
 			zIndex: "2"
 		};
+	}
+
+	changePage = (prev, next) => {
+		var paper = this.paper;
+		paper.activate();
+
+		console.log("current number of layer:" + paper.project.layers.length);
+		paper.project.activeLayer.visible = false;
+		if(paper.project.layers.length <= next) {
+			var newLayer = new paper.Layer();
+			newLayer.activate();
+		} else {
+			paper.project.layers[next].visible = true;
+			paper.project.layers[next].activate();
+		}
+		// paper.project.activeLayer.visible = false;
 	}
 
 	// calculateNewSize(containerWidth, containerHeight) {
@@ -91,6 +111,15 @@ class PaperLayer extends Component {
 			paper.activate();
 			paper.project.activeLayer.remove();
 			paper.project.importJSON(json.project);
+
+			for(var i=0; i<paper.project.layers.length; i++) {
+				if(i == 0) {
+					paper.project.layers[i].visible = true;
+					paper.project.layers[i].activate();
+				} else {
+					paper.project.layers[i].visible = false;
+				}
+			}
 
 			paper.view.draw();
 		};

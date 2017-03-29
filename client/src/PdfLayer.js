@@ -50,7 +50,7 @@ class PdfLayer extends Component {
 				top: canvasSize.startY + "px",
 				left: canvasSize.startX + "px",
 				width: canvasSize.newWidth + "px",
-				height: canvasSize.newHeight + "px",
+				height: canvasSize.newHeight + "px"
 			}
 		}
 	}

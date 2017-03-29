@@ -137,3 +137,20 @@ exports.addImage = function(room, artist, data, position, name, scale) {
     db.storeProject(room);
   }
 }
+
+// change page
+exports.changePage = function(room, artist, prev, next) {
+  var project = projects[room].project;
+  project.activate();
+
+  project.activeLayer.visible = false;
+  if(project.layers.length <= next) {
+    var newLayer = new paper.Layer();
+    newLayer.activate();
+  } else {
+    project.layers[next].visible = true;
+    project.layers[next].activate();
+  }
+  db.storeProject(room);
+  project.view.draw();
+}
