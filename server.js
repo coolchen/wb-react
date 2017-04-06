@@ -7,7 +7,8 @@ var settings = require('./util/Settings.js'),
 	paper = require('paper'),
     app = express(),
 	socket = require('socket.io'),
-	http = require('http')
+	http = require('http'),
+	jwt = require('jsonwebtoken');
 
  
     // I extracted some logic to another file; more on that in a moment
@@ -31,10 +32,21 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 app.get('/api/status', function(req, res) {
-	res.send("status is OK!");
+	// res.send("status is OK!");
+	res.send("jwt is: " + req.query.jwt);
 })
 
+app.use('/login', express.static(__dirname + '/pseudoAuth'));
 
+app.get('/pseudoAuth', function(req, res) {
+	// res.send("status is OK!");
+	var token = jwt.sign({
+		user: req.query.uname,
+		room: req.query.room
+	}, 'secret');
+
+	res.redirect("/api/status?jwt=" + token);
+})
  
 // ...presumably lots of other stuff...
  
