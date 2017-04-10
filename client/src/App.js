@@ -10,6 +10,8 @@ import Button from 'react-toolbox/lib/button/Button';
 
 import Dropzone from 'react-dropzone';
 import io from 'socket.io-client';
+import cookie from 'react-cookie';
+import request from 'superagent';
 
 import ContentView from './ContentView.js';
 
@@ -27,6 +29,8 @@ class App extends Component {
 		};
 		return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
 	}());
+
+  jwtParam = location.search.split('jwt=')[1]
 
   papers = []
   room = "1";
@@ -49,10 +53,11 @@ class App extends Component {
     var room = this.room;
     var socket = this.socket;
     var uid = this.uid;
+    var jwtParam = this.jwtParam;
 
 		// Join the room
 		socket.emit('subscribe', {
-			room: room
+			jwt: jwtParam
 		});
 
 		socket.on('project:load', function(json) {
@@ -110,12 +115,20 @@ class App extends Component {
   onDrop = (files) => {
     console.log('Received files: ', files);
     var paper = this.papers[0];
-    paper.uploadImage(files[0]);
+    // paper.uploadImage(files[0]);
+
+    request
+      .post('/upload')
+      .attach('file', files[0])
+      .end(() => console.log("upload sucessfully!"));
+
     this.handleToggle();
   }
 
   componentDidMount() {
     console.log("App component did mount!");
+    console.log("jwt is: " + this.jwtParam);
+    cookie.save('jwt', this.jwtParam, { path: '/' });
     this.setupWebSocketConnection();
   }
 
@@ -125,6 +138,7 @@ class App extends Component {
         <div className="Side-Bar">
           <Button icon='border_color' floating inverse />
           <Button icon='picture_as_pdf' floating inverse onClick={this.handleToggle} />
+          <Button icon='photo_library' floating inverse onClick={this.handleToggle} />
           <Button icon='delete_forever' floating inverse onClick={this.clearProject} />
         </div>
         <div className="Content-Wrapper">

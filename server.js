@@ -9,6 +9,46 @@ var settings = require('./util/Settings.js'),
 	socket = require('socket.io'),
 	http = require('http'),
 	jwt = require('jsonwebtoken');
+	multer  = require('multer');
+	cookieParser = require('cookie-parser');
+	fs = require('fs');
+
+
+	const storage = multer.diskStorage({
+		// destination: './uploads',
+		destination: function (req, file, cb) {
+			var path = './uploads/' + req.room;
+			if(!fs.existsSync(path)) {
+				fs.mkdirSync(path);
+			}
+			cb(null, path);
+		},
+		filename(req, file, cb) {
+			cb(null, `${file.originalname}`);
+		},
+	});
+	var upload = multer({ storage });
+
+	app.use(cookieParser());
+	
+	function jwtParser(req, res, next) {
+		var isAuthenticated = false;
+		if(req.cookies.jwt) {
+			var decoded = jwt.verify(req.cookies.jwt, 'secret');
+			if(decoded && decoded.room) {
+				isAuthenticated = true;
+				req.room = decoded.room;
+			}
+		}
+		if(isAuthenticated) {
+			next(); 
+		} else {
+			res.status(401);
+			res.send();
+		}
+	}
+
+	app.use(jwtParser);
 
  
     // I extracted some logic to another file; more on that in a moment
@@ -45,7 +85,13 @@ app.get('/pseudoAuth', function(req, res) {
 		room: req.query.room
 	}, 'secret');
 
-	res.redirect("/api/status?jwt=" + token);
+	res.redirect("http://localhost:3000/indext.html?jwt=" + token);
+})
+
+app.post('/upload', upload.single('file'), function (req, res, next) {
+  // req.file is the `avatar` file
+  // req.body will hold the text fields, if there were any
+  console.log("upload file!");
 })
  
 // ...presumably lots of other stuff...
@@ -61,9 +107,16 @@ io.sockets.setMaxListeners(0);
 
 io.sockets.on('connection', function (socket) {
 	console.log("client connected!");
+	var room;
 
 	socket.on('subscribe', function(data) {
-		subscribe(socket, data);
+		var decoded = jwt.verify(data.jwt, 'secret');
+		if(decoded && decoded.room) {
+			room = decoded.room;
+			subscribe(socket, decoded.room);
+		} else {
+			// TODO: send auth error to client
+		}
 	});
 
 	socket.on('disconnect', function () {
@@ -117,8 +170,8 @@ io.sockets.on('connection', function (socket) {
 });
 
 // Subscribe a client to a room
-function subscribe(socket, data) {
-  var room = data.room;
+function subscribe(socket, roomNumber) {
+  var room = roomNumber;
 
   // Subscribe the client to the room
   socket.join(room);
