@@ -4,6 +4,7 @@ import Button from 'react-toolbox/lib/button/Button';
 
 import PaperLayer from './PaperLayer.js'
 import PdfLayer from './PdfLayer.js'
+import BackgroundLayer from './BackgroundLayer.js'
 
 class ContentView extends Component {
 	constructor(props) {
@@ -107,10 +108,12 @@ class ContentView extends Component {
 					<PdfLayer viewID={this.props.viewID} 
 						room={this.props.room} uid={this.props.uid} page={this.state.pageIndex} 
 						canvasSize={this.state.canvasSize} pdfFile={this.props.pdfFile} 
-						setPageNumIndex={this.setPageNumberAndIndex} zIndex={1} />
+						setPageNumIndex={this.setPageNumberAndIndex} zIndex={2} />
 					<PaperLayer viewID={this.props.viewID} reg={this.props.reg} socket={this.props.socket} 
 						room={this.props.room} uid={this.props.uid} canvasSize={this.state.canvasSize}
-						page={this.state.pageIndex} zIndex={2} />
+						page={this.state.pageIndex} zIndex={3} />
+					<BackgroundLayer viewID={this.props.viewID} canvasSize={this.state.canvasSize}
+						zIndex={1} />
 				</div>
 				<div className="ContentToolBar">
 					<Button icon='keyboard_arrow_left' inverse mini onClick={this.prevPage}/>

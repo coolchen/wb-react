@@ -19,7 +19,7 @@ class App extends Component {
 
   state = {
     active: false,
-    pdfFile: "/uploaded/GPU_HowThingsWork.pdf"
+    // pdfFile: "/uploaded/GPU_HowThingsWork.pdf"
   }
 
 	// Random User ID

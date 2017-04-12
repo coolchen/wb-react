@@ -43,7 +43,7 @@ class PaperLayer extends Component {
 			width: canvasSize.newWidth + "px",
 			height: canvasSize.newHeight + "px",
 			position: "absolute",
-			zIndex: "2"
+			zIndex: "3"
 		};
 	}
 

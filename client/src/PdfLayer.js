@@ -80,18 +80,23 @@ class PdfLayer extends Component {
 	}
 
 	render() {
+		let pdf = null;
+		if(this.props.pdfFile && 0 != this.props.pdfFile.length) {
+			pdf = 	<div className="PdfCanvas">
+						<ReactPDF
+							file={this.props.pdfFile}
+							onDocumentLoad={this.onDocumentLoad}
+							onPageLoad={this.onPageLoad}
+							width={this.state.pdfNewWidth}
+							scale={this.state.pdfScale}
+							pageIndex={this.props.page}
+						/>
+					</div>
+		}
+
 		return (
 			<div style={this.state.styles} className="PdfLayer"  >
-				<div className="PdfCanvas">
-					<ReactPDF
-						file={this.props.pdfFile}
-						onDocumentLoad={this.onDocumentLoad}
-						onPageLoad={this.onPageLoad}
-						width={this.state.pdfNewWidth}
-						scale={this.state.pdfScale}
-						pageIndex={this.props.page}
-					/>
-				</div>
+				{pdf}
 			</div>
 		)
 	}
