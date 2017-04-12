@@ -128,7 +128,7 @@ class App extends Component {
       .attach('file', files[0])
       .end(() => {
         console.log("upload sucessfully!");
-        var fileName = '/uploads/' + this.room + '/' + files[0].name;
+        var fileName = '/uploads/' + files[0].name;
         this.setState({pdfFile: fileName});
         this.socket.emit('pdf:added', this.room, this.uid, fileName);
       });
@@ -164,7 +164,7 @@ class App extends Component {
           title='上传图片'
         >
             <Dropzone onDrop={this.onDrop}>
-              <div>Try dropping some files here, or click to select files to upload.</div>
+              <div className="Upload-Hint-Message">Try dropping some files here, or click to select files to upload.</div>
             </Dropzone>
         </Dialog>
       </div>

@@ -40,3 +40,8 @@
   float: left;
   background: dimgrey
 }
+
+.Upload-Hint-Message {
+  font-size: large;
+  margin: 5px;
+}
