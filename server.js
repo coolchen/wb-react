@@ -104,7 +104,8 @@ app.post('/upload', upload.single('file'), function (req, res, next) {
 
 app.use('/uploads', function(req, res) {
 	// res.sendFile();
-	res.sendFile(__dirname + "/uploads/" + req.url)
+	var url = decodeURI(req.url);
+	res.sendFile(__dirname + "/uploads/" + url)
 });
  
 // ...presumably lots of other stuff...
