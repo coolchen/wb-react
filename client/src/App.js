@@ -18,7 +18,8 @@ import ContentView from './ContentView.js';
 class App extends Component {
 
   state = {
-    active: false
+    active: false,
+    pdfFile: "/uploaded/GPU_HowThingsWork.pdf"
   }
 
 	// Random User ID
@@ -97,6 +98,11 @@ class App extends Component {
       var paper = papers[0];
       paper.clearCanvas();
     });
+
+    socket.on('pdf:added', (artist, fileName) => {
+			// It wasnt this user who created the event
+      this.setState({pdfFile: fileName});
+		});
   }
 
   handleToggle = () => {
@@ -120,7 +126,12 @@ class App extends Component {
     request
       .post('/upload')
       .attach('file', files[0])
-      .end(() => console.log("upload sucessfully!"));
+      .end(() => {
+        console.log("upload sucessfully!");
+        var fileName = '/uploads/' + this.room + '/' + files[0].name;
+        this.setState({pdfFile: fileName});
+        this.socket.emit('pdf:added', this.room, this.uid, fileName);
+      });
 
     this.handleToggle();
   }
@@ -143,7 +154,7 @@ class App extends Component {
         </div>
         <div className="Content-Wrapper">
           <ContentView viewID="view1" reg={this.registerPaperInstance.bind(this)} socket={this.socket} 
-            room={this.room} uid={this.uid}/>
+            room={this.room} uid={this.uid} pdfFile={this.state.pdfFile}/>
         </div>
         <Dialog
           actions={this.actions}

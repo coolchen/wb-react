@@ -34,10 +34,15 @@ var settings = require('./util/Settings.js'),
 	function jwtParser(req, res, next) {
 		var isAuthenticated = false;
 		if(req.cookies.jwt) {
-			var decoded = jwt.verify(req.cookies.jwt, 'secret');
+			try {
+				var decoded = jwt.verify(req.cookies.jwt, 'secret');
+			} catch (error) {
+				console.log("verify jwt failed!");
+			}
+
 			if(decoded && decoded.room) {
-				isAuthenticated = true;
-				req.room = decoded.room;
+					isAuthenticated = true;
+					req.room = decoded.room;
 			}
 		}
 		if(isAuthenticated) {
@@ -47,9 +52,6 @@ var settings = require('./util/Settings.js'),
 			res.send();
 		}
 	}
-
-	app.use(jwtParser);
-
  
     // I extracted some logic to another file; more on that in a moment
     // webpackDevHelper = require('./index.dev.js');
@@ -88,11 +90,22 @@ app.get('/pseudoAuth', function(req, res) {
 	res.redirect("http://localhost:3000/indext.html?jwt=" + token);
 })
 
+app.use(jwtParser);
+
 app.post('/upload', upload.single('file'), function (req, res, next) {
   // req.file is the `avatar` file
   // req.body will hold the text fields, if there were any
   console.log("upload file!");
+  res.status(200);
+  res.send();
 })
+
+// app.use("/uploads", express.static(__dirname + '/uploads'))
+
+app.use('/uploads', function(req, res) {
+	// res.sendFile();
+	res.sendFile(__dirname + "/uploads/" + req.url)
+});
  
 // ...presumably lots of other stuff...
  
@@ -110,7 +123,12 @@ io.sockets.on('connection', function (socket) {
 	var room;
 
 	socket.on('subscribe', function(data) {
-		var decoded = jwt.verify(data.jwt, 'secret');
+		try {
+			var decoded = jwt.verify(data.jwt, 'secret');
+		} catch (error) {
+			console.log("verify jwt failed!");
+		}
+		
 		if(decoded && decoded.room) {
 			room = decoded.room;
 			subscribe(socket, decoded.room);
@@ -165,6 +183,10 @@ io.sockets.on('connection', function (socket) {
 	socket.on('draw:changePage', function(room, uid, prev, next) {
 		draw.changePage(room, uid, prev, next);
 		io.sockets.in(room).emit('draw:changePage', uid, prev, next);
+	});
+
+	socket.on('pdf:added', function(room, uid, fileName) {
+		io.sockets.in(room).emit('pdf:added', uid, fileName);
 	});
 
 });

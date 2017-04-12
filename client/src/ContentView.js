@@ -68,6 +68,10 @@ class ContentView extends Component {
 	nextPage = () => {
 		var oldPage = this.state.pageIndex;
 		var newPage = this.state.pageIndex + 1;
+		if(newPage >= this.pagerNumber)
+		{
+			newPage = this.pageNumber - 1;
+		}
 		this.setState({
 			pageIndex: newPage
 		});
@@ -78,11 +82,22 @@ class ContentView extends Component {
 	prevPage = () => {
 		var oldPage = this.state.pageIndex;
 		var newPage = this.state.pageIndex - 1;
+		if(newPage < 0)
+		{
+			newPage = 0;
+		}
 		this.setState({
 			pageIndex: newPage
 		});
 
 		this.props.socket.emit('draw:changePage', this.props.room, this.uid, oldPage, newPage);
+	}
+
+	setPageNumberAndIndex = (number, index) => {
+		this.setState({
+			pageNumber: number,
+			pageIndex: index
+		});
 	}
 
 	render() {
@@ -91,7 +106,8 @@ class ContentView extends Component {
 				<div className="ContentAera">
 					<PdfLayer viewID={this.props.viewID} 
 						room={this.props.room} uid={this.props.uid} page={this.state.pageIndex} 
-						canvasSize={this.state.canvasSize} zIndex={1} />
+						canvasSize={this.state.canvasSize} pdfFile={this.props.pdfFile} 
+						setPageNumIndex={this.setPageNumberAndIndex} zIndex={1} />
 					<PaperLayer viewID={this.props.viewID} reg={this.props.reg} socket={this.props.socket} 
 						room={this.props.room} uid={this.props.uid} canvasSize={this.state.canvasSize}
 						page={this.state.pageIndex} zIndex={2} />

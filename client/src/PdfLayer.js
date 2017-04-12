@@ -56,7 +56,8 @@ class PdfLayer extends Component {
 	}
 
 	onDocumentLoad = ({ total }) => {
-		this.setState({ total });
+		// this.setState({ total });
+		this.props.setPageNumIndex(total, 0);
 	}
 
 	// onPageLoad = ({ pageIndex, pageNumber }) => {
@@ -74,6 +75,8 @@ class PdfLayer extends Component {
 
 		this.setState(this.calculateNewPdfSize(this.props.canvasSize,
 							this.pdfWidth, this.pdfHeight));
+
+		// this.props.setPageNumIndex(pageNumber, pageIndex);
 	}
 
 	render() {
@@ -81,7 +84,7 @@ class PdfLayer extends Component {
 			<div style={this.state.styles} className="PdfLayer"  >
 				<div className="PdfCanvas">
 					<ReactPDF
-						file="uploaded/GPU_HowThingsWork.pdf"
+						file={this.props.pdfFile}
 						onDocumentLoad={this.onDocumentLoad}
 						onPageLoad={this.onPageLoad}
 						width={this.state.pdfNewWidth}
