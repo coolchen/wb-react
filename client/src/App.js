@@ -34,6 +34,7 @@ class App extends Component {
   jwtParam = location.search.split('jwt=')[1]
 
   papers = []
+  contentViews = []
   room = "1";
   // Initialise Socket.io
   // var base_path = /(\/.+)?\/d\/.*/.exec(window.location.pathname)[1] || '/';
@@ -43,6 +44,11 @@ class App extends Component {
   registerPaperInstance(pid, paper){
     this.papers.push(paper);
     // this.setupWebSocketConnection();
+  }
+
+  // TODO: use reactive to replace this kind of register
+  registerContentView(pid, contentView) {
+    this.contentViews.push(contentView);
   }
 
   unregisterPaperInstance(pid) {
@@ -55,6 +61,7 @@ class App extends Component {
     var socket = this.socket;
     var uid = this.uid;
     var jwtParam = this.jwtParam;
+    var contentViews = this.contentViews;
 
 		// Join the room
 		socket.emit('subscribe', {
@@ -103,6 +110,11 @@ class App extends Component {
 			// It wasnt this user who created the event
       this.setState({pdfFile: fileName});
 		});
+
+    socket.on('draw:changePage', function (artist, oldPage, newPage) {
+      var contentView = contentViews[0];
+      contentView.changePage(newPage);
+    });
   }
 
   handleToggle = () => {
@@ -154,7 +166,8 @@ class App extends Component {
         </div>
         <div className="Content-Wrapper">
           <ContentView viewID="view1" reg={this.registerPaperInstance.bind(this)} socket={this.socket} 
-            room={this.room} uid={this.uid} pdfFile={this.state.pdfFile}/>
+            regContentView={this.registerContentView.bind(this)} room={this.room} 
+            uid={this.uid} pdfFile={this.state.pdfFile}/>
         </div>
         <Dialog
           actions={this.actions}

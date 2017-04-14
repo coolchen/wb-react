@@ -66,6 +66,18 @@ class ContentView extends Component {
 		}
 	}
 
+	componentDidMount() {
+		this.props.regContentView(1, {
+			changePage: this.changePage
+		});
+	}
+
+	changePage = (newPage) => {
+		this.setState({
+			pageIndex: newPage
+		});
+	}
+
 	nextPage = () => {
 		var oldPage = this.state.pageIndex;
 		var newPage = this.state.pageIndex + 1;
