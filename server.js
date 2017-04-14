@@ -84,7 +84,8 @@ app.get('/pseudoAuth', function(req, res) {
 	// res.send("status is OK!");
 	var token = jwt.sign({
 		user: req.query.uname,
-		room: req.query.room
+		room: req.query.room,
+		role: req.query.role
 	}, 'secret');
 
 	var redirectHost = req.headers.host.replace('3001', '3000');
