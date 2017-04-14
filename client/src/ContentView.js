@@ -33,6 +33,13 @@ class ContentView extends Component {
 			// this.setState(this.calculateNewPdfSize(nextProps.containerWidth, nextProps.containerHeight, 
 			// 				this.pdfWidth, this.pdfHeight));
 		}
+
+		if(!nextProps.pdfFile || 0 == nextProps.pdfFile.length) {
+			this.setState({
+				pageIndex : 0,
+				pageNumber: 1
+			});
+		}
 	}
 
 

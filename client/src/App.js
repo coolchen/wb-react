@@ -101,9 +101,12 @@ class App extends Component {
       }
     });
 
-    socket.on('canvas:clear', function() {
+    socket.on('canvas:clear', () => {
       var paper = papers[0];
       paper.clearCanvas();
+      this.setState({
+        pdfFile: null
+      });
     });
 
     socket.on('pdf:added', (artist, fileName) => {
