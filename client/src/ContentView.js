@@ -12,7 +12,7 @@ class ContentView extends Component {
 		// this.state = this.calculateNewSize(props.containerWidth, props.containerHeight);
 		this.state = {
 			pageIndex: 0,
-			pageNumber: 5,
+			pageNumber: 1,
 			canvasSize: this.calculateNewSize(this.props.containerWidth, this.props.containerHeight * 0.95)
 		}
 	}
@@ -69,9 +69,9 @@ class ContentView extends Component {
 	nextPage = () => {
 		var oldPage = this.state.pageIndex;
 		var newPage = this.state.pageIndex + 1;
-		if(newPage >= this.pagerNumber)
+		if(newPage >= this.state.pageNumber)
 		{
-			newPage = this.pageNumber - 1;
+			newPage = this.state.pageNumber - 1;
 		}
 		this.setState({
 			pageIndex: newPage
@@ -117,6 +117,7 @@ class ContentView extends Component {
 				</div>
 				<div className="ContentToolBar">
 					<Button icon='keyboard_arrow_left' inverse mini onClick={this.prevPage}/>
+					<span>{this.state.pageIndex + 1} / {this.state.pageNumber} </span>
 					<Button icon='keyboard_arrow_right' inverse mini onClick={this.nextPage}/>
 				</div>
 			</div>
