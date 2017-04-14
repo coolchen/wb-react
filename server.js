@@ -87,7 +87,8 @@ app.get('/pseudoAuth', function(req, res) {
 		room: req.query.room
 	}, 'secret');
 
-	res.redirect("http://localhost:3000/indext.html?jwt=" + token);
+	var redirectHost = req.headers.host.replace('3001', '3000');
+	res.redirect("http://" + redirectHost + "/indext.html?jwt=" + token);
 })
 
 app.use(jwtParser);
