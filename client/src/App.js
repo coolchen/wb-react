@@ -136,17 +136,21 @@ class App extends Component {
   onDrop = (files) => {
     console.log('Received files: ', files);
     var paper = this.papers[0];
-    // paper.uploadImage(files[0]);
+    if(files[0].type == "application/pdf") {
+      request
+        .post('/upload')
+        .attach('file', files[0])
+        .end(() => {
+          console.log("upload sucessfully!");
+          var fileName = '/uploads/' + files[0].name;
+          this.setState({pdfFile: fileName});
+          this.socket.emit('canvas:clear', this.room);
+          this.socket.emit('pdf:added', this.room, this.uid, fileName);
+        });
+    } else {
+      paper.uploadImage(files[0]);
+    }
 
-    request
-      .post('/upload')
-      .attach('file', files[0])
-      .end(() => {
-        console.log("upload sucessfully!");
-        var fileName = '/uploads/' + files[0].name;
-        this.setState({pdfFile: fileName});
-        this.socket.emit('pdf:added', this.room, this.uid, fileName);
-      });
 
     this.handleToggle();
   }
@@ -177,9 +181,9 @@ class App extends Component {
           active={this.state.active}
           onEscKeyDown={this.handleToggle}
           onOverlayClick={this.handleToggle}
-          title='上传图片'
+          title='Upload File'
         >
-            <Dropzone onDrop={this.onDrop}>
+            <Dropzone onDrop={this.onDrop} multiple={false}>
               <div className="Upload-Hint-Message">Try dropping some files here, or click to select files to upload.</div>
             </Dropzone>
         </Dialog>
