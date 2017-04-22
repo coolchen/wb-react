@@ -189,6 +189,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	socket.on('pdf:added', function(room, uid, fileName) {
+		draw.addPdf(room, uid, fileName);
 		io.sockets.in(room).emit('pdf:added', uid, fileName);
 	});
 
@@ -216,8 +217,10 @@ function subscribe(socket, roomNumber) {
     // this project as each room has its own project. We share the View
     // object but that just helps it "draw" stuff to the invisible server
     // canvas.
-    projects.projects[room].project = new paper.Project();
-    projects.projects[room].external_paths = {};
+    projects.projects[room].project = {
+		paperProject: new paper.Project()
+	};
+    projects.projects[room].project.external_paths = {};
     db.load(room, socket);
   } else { // Project exists in memory, no need to load from database
     loadFromMemory(room, socket);
@@ -235,14 +238,20 @@ var clientSettings = {
 
 // Send current project to new client
 function loadFromMemory(room, socket) {
-  var project = projects.projects[room].project;
+  var project = projects.projects[room].project.paperProject;
   if (!project) { // Additional backup check, just in case
     db.load(room, socket);
     return;
   }
   socket.emit('loading:start');
   var value = project.exportJSON();
-  socket.emit('project:load', {project: value});
+  var data = {
+	paperProject: value
+  };
+  if(projects.projects[room].project.pdfFile) {
+	  data.pdfFile = projects.projects[room].project.pdfFile;
+  }
+  socket.emit('project:load', data);
   socket.emit('settings', clientSettings);
   socket.emit('loading:end');
 }

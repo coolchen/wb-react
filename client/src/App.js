@@ -68,14 +68,19 @@ class App extends Component {
 			jwt: jwtParam
 		});
 
-		socket.on('project:load', function(json) {
+		socket.on('project:load', (json) => {
 			// console.log("project:load");
 			// paper.project.activeLayer.remove();
 			// paper.project.importJSON(json.project);
 
 			// paper.view.draw();
+      if(json.pdfFile) {
+        this.setState({
+          pdfFile: json.pdfFile
+        });
+      }
       var paper = papers[0];
-      paper.loadProject(json);
+      paper.loadProject(json.paperProject);
 		});
 
 		socket.on('draw:progress', (artist, data) => {

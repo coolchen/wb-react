@@ -110,7 +110,7 @@ class PaperLayer extends Component {
 			console.log("project:load");
 			paper.activate();
 			paper.project.activeLayer.remove();
-			paper.project.importJSON(json.project);
+			paper.project.importJSON(json);
 
 			for(var i=0; i<paper.project.layers.length; i++) {
 				if(i == 0) {

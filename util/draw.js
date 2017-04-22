@@ -9,15 +9,15 @@ var drawing = paper.setup(new paper.Canvas(1280, 720));
 
 // Continues to draw a path in real time
 exports.progressExternalPath = function (room, points, artist) {
-  var project = projects[room].project;
+  var project = projects[room].project.paperProject;
   project.activate();
-  var path = projects[room].external_paths[artist];
+  var path = projects[room].project.external_paths[artist];
 
   // The path hasn't already been started
   // So start it
   if (!path) {
-    projects[room].external_paths[artist] = new drawing.Path();
-    path = projects[room].external_paths[artist];
+    projects[room].project.external_paths[artist] = new drawing.Path();
+    path = projects[room].project.external_paths[artist];
 
     // Starts the path
     var start_point = new drawing.Point(points.start[1], points.start[2]);
@@ -48,9 +48,9 @@ exports.progressExternalPath = function (room, points, artist) {
 };
 
 exports.endExternalPath = function (room, points, artist) {
-  var project = projects[room].project;
+  var project = projects[room].project.paperProject;
   project.activate();
-  var path = projects[room].external_paths[artist];
+  var path = projects[room].project.external_paths[artist];
   if (path) {
     // Close the path
     path.add(new drawing.Point(points.end[1], points.end[2]));
@@ -58,13 +58,13 @@ exports.endExternalPath = function (room, points, artist) {
     path.smooth();
     project.view.draw();
     // Remove the old data
-    projects[room].external_paths[artist] = false;
+    projects[room].project.external_paths[artist] = false;
   }
   db.storeProject(room);
 };
 
 exports.clearCanvas = function(room) {
-  var project = projects[room].project;
+  var project = projects[room].project.paperProject;
   if (project && project.activeLayer && project.activeLayer.hasChildren()) {
     // Remove all but the active layer
     if (project.layers.length > 1) {
@@ -80,13 +80,18 @@ exports.clearCanvas = function(room) {
     if (project && project.activeLayer && project.activeLayer.hasChildren()) {
       project.activeLayer.removeChildren();
     }
+
+    // clear pdf file
+    if(projects[room].project && projects[room].project.pdfFile) {
+      projects[room].project.pdfFile = null;
+    }
     db.storeProject(room);
   }
 }
 
 // Remove an item from the canvas
 exports.removeItem = function(room, artist, itemName) {
-  var project = projects[room].project;
+  var project = projects[room].project.paperProject;
   if (project && project.activeLayer && project.activeLayer._namedChildren[itemName] && project.activeLayer._namedChildren[itemName][0]) {
     project.activeLayer._namedChildren[itemName][0].remove();
     db.storeProject(room);
@@ -95,7 +100,7 @@ exports.removeItem = function(room, artist, itemName) {
 
 // Move one or more existing items on the canvas
 exports.moveItemsProgress = function(room, artist, itemNames, delta) {
-  var project = projects[room].project;
+  var project = projects[room].project.paperProject;
   if (project && project.activeLayer) {
     for (x in itemNames) {
       var itemName = itemNames[x];
@@ -111,7 +116,7 @@ exports.moveItemsProgress = function(room, artist, itemNames, delta) {
 // Move one or more existing items on the canvas
 // and write to DB
 exports.moveItemsEnd = function(room, artist, itemNames, delta) {
-  var project = projects[room].project;
+  var project = projects[room].project.paperProject;
   if (project && project.activeLayer) {
     for (x in itemNames) {
       var itemName = itemNames[x];
@@ -127,7 +132,7 @@ exports.moveItemsEnd = function(room, artist, itemNames, delta) {
 
 // Add image to canvas
 exports.addImage = function(room, artist, data, position, name, scale) {
-  var project = projects[room].project;
+  var project = projects[room].project.paperProject;
   if (project && project.activeLayer) {
     var image = JSON.parse(data);
     var raster = new drawing.Raster(image);
@@ -140,7 +145,7 @@ exports.addImage = function(room, artist, data, position, name, scale) {
 
 // change page
 exports.changePage = function(room, artist, prev, next) {
-  var project = projects[room].project;
+  var project = projects[room].project.paperProject;
   project.activate();
 
   project.activeLayer.visible = false;
@@ -153,4 +158,12 @@ exports.changePage = function(room, artist, prev, next) {
   }
   db.storeProject(room);
   project.view.draw();
+}
+
+// add pdf file
+exports.addPdf = function(room, artist, pdfFile) {
+  var project = projects[room].project;
+  
+  project.pdfFile = pdfFile;
+  db.storeProject(room);
 }
